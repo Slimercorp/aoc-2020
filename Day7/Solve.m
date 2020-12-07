@@ -45,11 +45,11 @@ end
 %% solve
 stringToSearch = string('shiny gold');
 step = 0;
-iterationsCell=cell(1,1);
 listAll = string(zeros(1,1));
 stop = false;
 while ~stop
     step = step + 1;
+    sizeStringToSearch = length(stringToSearch);
     for i = 1:length(stringToSearch)
         list = getBags(M, keyCounter, keyCell, stringToSearch(i));
         
@@ -72,14 +72,9 @@ while ~stop
             
         end
         
-        if listClean(1) == '0'
-            stop = true;
-            break;
-        end
-        
         if step == 1
             listAll = listClean;
-        else
+        elseif listClean(1) ~= '0'
             listAll = [listAll; listClean];
         end
         
@@ -87,11 +82,14 @@ while ~stop
     
     stringToSearch = listAll;
     
+    if sizeStringToSearch == length(stringToSearch)
+        stop = true;
+    end
 
 end
 
 length(listAll)
-
+%%
 function list = getBags(M, keyCounter, keyCell, stringToSearch)
     list=string(zeros(1,1));
     counter = 0;
