@@ -42,13 +42,13 @@ while 1
     for i=1:cases
         caseBin = dec2bin(i-1,driftBitsLength);
         
-        for j=1:length(caseBin)
+        for j=1:driftBitsLength
             memIndexChangedTemp(driftBits(j)) = caseBin(j);
         end
         
         key = bin2dec(memIndexChangedTemp);
         thereis = false;
-        for j=1:length(keySetLength)
+        for j=1:keySetLength
             if keySet(j) == key
                 thereis = true;
                 break;
