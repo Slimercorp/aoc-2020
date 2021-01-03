@@ -59,11 +59,22 @@ puzzleMap(i,j) = usedIds;
 extendedData(i,j) = struct('flipVert', 0, ...
                            'flipHor', 0, ...
                             'rotate', 0);
+lastSizeUsedId = 1;
+maxI = 125; minI = 125;
+maxJ = 125; minJ = 125;
+
 while 1
     checkId = checkId + 1;
     
     if checkId > length(data)
         checkId = 1;
+        if length(usedIds) == lastSizeUsedId % stuck
+            puzzleMap(minI:maxI,minJ:maxJ)
+            useHelpMe = true;
+            
+        end
+
+        lastSizeUsedId = length(usedIds);
     end
     
     indexs = find(usedIds == checkId);
@@ -99,6 +110,11 @@ while 1
           case 4
               i = i -1;
       end
+      
+      minI = min(minI, i);
+      minJ = min(minJ, j);
+      maxI = max(maxI, i);
+      maxJ = max(maxJ, j);
         
       puzzleMap(i,j) = checkId;
       extendedData(i,j) = struct('flipVert', flipVert, ...
@@ -124,13 +140,9 @@ function [ok, posOriginal, flipVert, flipHor, rotate] = checkFrames(frame1, fram
     % вертикали 0/1
     % flipHor - проверяемый кадр сначала перевернули относительно
     % горизонтали 0/1
-    % rotate - кадр перевернули на 90 градусов по часовой стрелке, сколько
+    % rotate - кадр перевернули на 90 градусов против часовой стрелки, сколько
     % раз 0 - 0 раз, 1 - 1 раз и т.д.
 
-    ok = true;
-    flipVert = 0;
-    flipHor = 0;
-    rotate = 0;
     for posOriginal=1:4 
         
         switch (posOriginal)
@@ -147,6 +159,7 @@ function [ok, posOriginal, flipVert, flipHor, rotate] = checkFrames(frame1, fram
         for flipVert = 0:1
             for flipHor = 0:1
                 for rotate = 0:3
+                    ok = true;
                     frame2Changed = getChangedFrame(frame2, flipVert, flipHor, rotate);
                     
                     switch (posOriginal)
