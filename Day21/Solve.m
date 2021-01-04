@@ -98,4 +98,22 @@ while 1
 end
 
 %%
+% manual efforts
+%%
+detectedAllergens =[string('clg'); string('lxjtns'); string('vzzz'); string('knprxg'); string('prxmdlz'); ....
+    string('ncjv'); string('cxfz'); string('qdfpq')];
+sum = 0;
+for i=1:lengthKeysIngredientsMap
+    ingredient = keysIngredientsMap(i);
+    indexs = find(detectedAllergens == ingredient);
+    if isempty(indexs)
+        sum = sum + eval(['ingredientsMap(',char(39),char(ingredient),char(39),')']); 
+    else
+        %ignore
+        gfdg = 1;
+    end
+end
 
+sum
+
+string("prxmdlz,ncjv,knprxg,lxjtns,vzzz,clg,cxfz,qdfpq");
