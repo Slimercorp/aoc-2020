@@ -1,78 +1,85 @@
 clear; clc;
-%input = 523764819;
-input = 389125467;
+input = 523764819;
+%input = 389125467;
+part1 = 0;
+%% decode
 sitTemp = num2str(input);
+for i=1:length(sitTemp)-1
+    index = str2num(sitTemp(i));
+    sit(index,1) = str2num(sitTemp(i+1));
+end
+    
+lastValue = str2num(sitTemp(end));
+firstValue =  str2num(sitTemp(1));
 
-for i=1:length(sitTemp)
-    sit(i) = str2num(sitTemp(i));
+if part1
+    % part1
+    steps = 100;
+else
+    % part2
+    maxValue = max(sit);
+    for i=maxValue+1:1000000
+        sit(lastValue) = i;
+        lastValue = i;
+    end
+    
+    steps = 1e7;
 end
 
-maxValue = max(sit);
-value = maxValue;
-for i=length(sit):1000000
-    value = value + 1;
-    sit(i) = value;
-end
-
+sit(lastValue) = firstValue;
 len = length(sit);
-picksUped = [-1 -1 -1];
 %%
-current = sit(1);
-currentIndex = 1;
+current = str2num(sitTemp(1));
 
 n = 0;
-while n<10000000   
+while n<steps
+
     n = n + 1;
-    if (mod(n,100) == 0)
-        disp(['N = ',num2str(n)]);
+    
+    if mod(n,100000) == 0
+        clc;
+        disp(['Proc = ', num2str(n/steps*100)]);
     end
     
     %% pickup 3 cups
+    startCurrent = current;
+    currentTemp = current;
     for i = 1:3
-        indexNeed = currentIndex + i;
-        if indexNeed > len
-            indexNeed = indexNeed - len;
-        end
-        picksUped(1,i) = sit(indexNeed);
+        picksUped(1,i) = sit(currentTemp);
+        currentTemp = sit(currentTemp);
     end
     
-    % clean
-    for i = 1:3
-        index = find(sit == picksUped(1,i));
-        sit(index) = [];
-    end
-    
+    % break connections
+    sit(startCurrent) = sit(currentTemp);
+
     %% calculate current cup
     dest = current;
     while 1
         dest = dest - 1;
         if dest < 1
-            dest = 9;
+            dest = 1000000;
         end
         
-        destIndex = find(sit == dest);
+        destIndex = find(picksUped == dest);
         
-        if ~isempty(destIndex)
+        if isempty(destIndex)
             break;
         end
     end
     
     %% insert pickuped 3 cups
-    sitNew = [sit(1:destIndex) picksUped sit(destIndex+1:end)];
-    sit = sitNew;
+    destAddress = sit(dest);
+    
+    sit(dest) = picksUped(1,1);
+    sit(picksUped(1,3)) = destAddress;
+    
     %% new current
-    currentIndex = find(sit == current);
-    currentIndex = currentIndex + 1;
-    if currentIndex > len
-        currentIndex = currentIndex - len;
-    end
-    current = sit(currentIndex);
+    current = sit(current);
     
     
 end
 
-index = find(sit == 1);
-sit(index+1)
-sit(index+2)
+current1 = sit(1)
+current2 = sit(current1)
 
-sit(index+1) * sit(index+2)
+current1 * current2
