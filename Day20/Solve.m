@@ -51,86 +51,92 @@ end
 
 %%
 puzzleMap = zeros(250,250);
-i = 125; j = 125; 
-usedIds = 1;
-checkId = 1;
+usedIds = 15;
 
-puzzleMap(i,j) = usedIds;
-extendedData(i,j) = struct('flipVert', 0, ...
+puzzleMap(125,125) = usedIds;
+extendedData(125,125) = struct('flipVert', 0, ...
                            'flipHor', 0, ...
                             'rotate', 0);
-lastSizeUsedId = 1;
-maxI = 125; minI = 125;
-maxJ = 125; minJ = 125;
 
 while 1
-    checkId = checkId + 1;
-    
-    if checkId > length(data)
-        checkId = 1;
-        if length(usedIds) == lastSizeUsedId % stuck
-            puzzleMap(minI:maxI,minJ:maxJ)
-            useHelpMe = true;
+    for i=2:249
+        for j=2:249
             
-        end
+            if puzzleMap(i,j) ~= 0 && checkNeigb(puzzleMap,i,j) < 4
+                checkId = 1;
+                while 1
+                    checkId = checkId + 1;
 
-        lastSizeUsedId = length(usedIds);
+                    if checkId > length(data)
+                        break;
+                    end
+
+                    indexs = find(usedIds == checkId);
+                    if ~isempty(indexs)        
+                        continue;
+                    end
+
+                    %проверяем через функцию подходит ли к текущему квадрату i,j выбранный
+                    %квадрат checkId. Функция проверяет совпадение с каждой из 4-рех
+                    %сторон, полностью поворачивая и вращая квадрат. На выходе сообщение
+                    %подошло или нет, а если подошло, то в каком положении и на какой
+                    %стороне
+                    frame1 = data{puzzleMap(i,j)}.frame;
+                    flipVert1 = extendedData(i,j).flipVert;
+                    flipHor1 = extendedData(i,j).flipHor;
+                    rotate1 = extendedData(i,j).rotate;
+                    frame1RotatedFlipped = getChangedFrame(frame1, flipVert1, flipHor1, rotate1);
+
+                    frame2 = data{checkId}.frame;
+                    [ok, posOriginal, flipVert, flipHor, rotate] = checkFrames(frame1RotatedFlipped, frame2);
+
+                    % по данному сообщению мы ставим его в нужное положение и переходим на
+                    % его клетку, записываем его номер в уже использованные квадраты.
+                    
+                    if ok
+                      tempI = i;
+                      tempJ = j;
+                      switch (posOriginal)
+                          case 1
+                              tempJ = tempJ -1;
+                          case 2
+                              tempI = tempI + 1;
+                          case 3
+                              tempJ = tempJ + 1;
+                          case 4
+                              tempI = tempI -1;
+                      end
+
+                      puzzleMap(tempI,tempJ) = checkId;
+                      extendedData(tempI,tempJ) = struct('flipVert', flipVert, ...
+                                                 'flipHor', flipHor, ...
+                                                 'rotate', rotate);
+
+                      usedIds = [usedIds; checkId];
+                      clc;
+                      disp(['Совпадений ',num2str(length(usedIds)),'/',num2str(length(data))]);
+                    end
+                    
+                end
+            end
+        end                    
     end
-    
-    indexs = find(usedIds == checkId);
-    if ~isempty(indexs)        
-        continue;
-    end
-    
-    %проверяем через функцию подходит ли к текущему квадрату i,j выбранный
-    %квадрат checkId. Функция проверяет совпадение с каждой из 4-рех
-    %сторон, полностью поворачивая и вращая квадрат. На выходе сообщение
-    %подошло или нет, а если подошло, то в каком положении и на какой
-    %стороне
-    frame1 = data{puzzleMap(i,j)}.frame;
-    flipVert1 = extendedData(i,j).flipVert;
-    flipHor1 = extendedData(i,j).flipHor;
-    rotate1 = extendedData(i,j).rotate;
-    frame1RotatedFlipped = getChangedFrame(frame1, flipVert1, flipHor1, rotate1);
-    
-    frame2 = data{checkId}.frame;
-    [ok, posOriginal, flipVert, flipHor, rotate] = checkFrames(frame1RotatedFlipped, frame2);
-    
-    % по данному сообщению мы ставим его в нужное положение и переходим на
-    % его клетку, записываем его номер в уже использованные квадраты.
-    
-    if ok
-      switch (posOriginal)
-          case 1
-              j = j -1;
-          case 2
-              i = i + 1;
-          case 3
-              j = j + 1;
-          case 4
-              i = i -1;
-      end
-      
-      minI = min(minI, i);
-      minJ = min(minJ, j);
-      maxI = max(maxI, i);
-      maxJ = max(maxJ, j);
-        
-      puzzleMap(i,j) = checkId;
-      extendedData(i,j) = struct('flipVert', flipVert, ...
-                                 'flipHor', flipHor, ...
-                                 'rotate', rotate);
-      
-      usedIds = [usedIds; checkId];
-    end
-    
-    %проверяем не все ли кадры мы использовали, если да, то прерываем цикл.   
-    
+                
+    %проверяем не все ли кадры мы использовали, если да, то прерываем цикл.    
     if length(usedIds) == length(data)
         break;
     end 
     
+    
 end
+
+% после изменений начального id в data от 1 до 15 и анализу заполнения
+% puzzleMap в максимуме 122/143 (видимо баг какой то) было видно, что
+% границы пазла это фрагменты которые хранятся в data под номерами 117, 64,
+% 135, 23. Остается только получить id frame этих кадров и перемножить. Не
+% заполняется  полностью puzzleMap скорее всего из-за какого то бага.
+% Возможно его надо будет найти для второй части
+
 
 %%
 function [ok, posOriginal, flipVert, flipHor, rotate] = checkFrames(frame1, frame2)
@@ -225,4 +231,28 @@ end
 
 function frameOut = getRotateFrame(frame, times)
     frameOut = rot90(frame, times);
+end
+
+function neigb = checkNeigb(puzzleMap,i,j)
+    neigb = 0;
+    %низ
+    if puzzleMap(i+1,j) ~= 0
+        neigb = neigb + 1;
+    end
+    
+    %верх
+    if puzzleMap(i-1,j) ~= 0
+        neigb = neigb + 1;
+    end
+    
+    %слева
+    if puzzleMap(i,j-1) ~= 0
+        neigb = neigb + 1;
+    end
+    
+    %справа
+    if puzzleMap(i,j+1) ~= 0
+        neigb = neigb + 1;
+    end
+    
 end
