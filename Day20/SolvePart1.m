@@ -9,6 +9,10 @@ while 1
     rowFile = rowFile + 1;
     tline = fgetl(fid);
     if ~ischar(tline)
+         i = i + 1;
+         frameStruct = struct('id', numberMsg, ...
+                                 'frame', array);
+         data{i,1} = frameStruct;
         break;
     end
     
@@ -50,20 +54,33 @@ while 1
 end
 
 %%
-puzzleMap = zeros(250,250);
-usedIds = 15;
+puzzleMap = zeros(12,12);
+usedIds = [135; 64; 117; 23];
 
-puzzleMap(125,125) = usedIds;
-extendedData(125,125) = struct('flipVert', 0, ...
+puzzleMap(1,1) = 135;
+extendedData(1,1) = struct('flipVert', 0, ...
                            'flipHor', 0, ...
-                            'rotate', 0);
+                            'rotate', 1);
+puzzleMap(1,12) = 23;
+extendedData(1,12) = struct('flipVert', 0, ...
+                           'flipHor', 0, ...
+                            'rotate', 1);
+                        
+puzzleMap(12,1) = 64;
+extendedData(12,1) = struct('flipVert', 0, ...
+                           'flipHor', 1, ...
+                            'rotate', 0); 
 
+puzzleMap(12,12) = 117;
+extendedData(12,12) = struct('flipVert', 0, ...
+                           'flipHor', 0, ...
+                            'rotate', 3); 
 while 1
-    for i=2:249
-        for j=2:249
+    for i=1:12
+        for j=1:12
             
             if puzzleMap(i,j) ~= 0 && checkNeigb(puzzleMap,i,j) < 4
-                checkId = 1;
+                checkId = 0;
                 while 1
                     checkId = checkId + 1;
 
@@ -88,7 +105,12 @@ while 1
                     frame1RotatedFlipped = getChangedFrame(frame1, flipVert1, flipHor1, rotate1);
 
                     frame2 = data{checkId}.frame;
+                    if i==1 && j == 9 && checkId == 21
+                        dfgdf =1;
+                    end
+                    
                     [ok, posOriginal, flipVert, flipHor, rotate] = checkFrames(frame1RotatedFlipped, frame2);
+
 
                     % по данному сообщению мы ставим его в нужное положение и переходим на
                     % его клетку, записываем его номер в уже использованные квадраты.
@@ -202,56 +224,57 @@ function frameOut = getChangedFrame(frame, flipVert, flipHor, rotate)
     frameOut = frame;
     
     if flipVert
-        frameOut = getFlipVertFrame(frame);
+        frameOut = getFlipVertFrame(frameOut);
     end
     
     if flipHor
-        frameOut = getFlipHorFrame(frame);
+        frameOut = getFlipHorFrame(frameOut);
     end
     
     if rotate ~= 0
-        frameOut = getRotateFrame(frame, rotate);
+        frameOut = getRotateFrame(frameOut, rotate);
     end
 
-end
-
-function frameOut = getFlipVertFrame(frame)
-    frameOut = zeros(10,10);
-    for i=1:10
-        frameOut(:,i) = frame(:,11-i);
-    end
-end
-
-function frameOut = getFlipHorFrame(frame)
-    frameOut = zeros(10,10);
-    for i=1:10
-        frameOut(i,:) = frame(11-i,:);
-    end
-end
-
-function frameOut = getRotateFrame(frame, times)
-    frameOut = rot90(frame, times);
 end
 
 function neigb = checkNeigb(puzzleMap,i,j)
     neigb = 0;
+    rowMax = size(puzzleMap,1);
+    columnMax = size(puzzleMap,2);
+    
     %низ
-    if puzzleMap(i+1,j) ~= 0
+    if (i+1) <= rowMax
+        if puzzleMap(i+1,j) ~= 0
+            neigb = neigb + 1;
+        end
+    else
         neigb = neigb + 1;
     end
     
     %верх
-    if puzzleMap(i-1,j) ~= 0
+    if (i-1) >= 1
+        if puzzleMap(i-1,j) ~= 0
+            neigb = neigb + 1;
+        end
+    else
         neigb = neigb + 1;
     end
     
     %слева
-    if puzzleMap(i,j-1) ~= 0
-        neigb = neigb + 1;
+    if (j-1) >= 1
+        if puzzleMap(i,j-1) ~= 0
+            neigb = neigb + 1;
+        end
+    else
+       neigb = neigb + 1; 
     end
     
     %справа
-    if puzzleMap(i,j+1) ~= 0
+    if (j+1) <= columnMax
+        if puzzleMap(i,j+1) ~= 0
+            neigb = neigb + 1;
+        end
+    else
         neigb = neigb + 1;
     end
     
