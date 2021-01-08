@@ -152,12 +152,7 @@ while 1
     
 end
 
-% после изменений начального id в data от 1 до 15 и анализу заполнения
-% puzzleMap в максимуме 122/143 (видимо баг какой то) было видно, что
-% границы пазла это фрагменты которые хранятся в data под номерами 117, 64,
-% 135, 23. Остается только получить id frame этих кадров и перемножить. Не
-% заполняется  полностью puzzleMap скорее всего из-за какого то бага.
-% Возможно его надо будет найти для второй части
+save('part1.mat','puzzleMap','data','extendedData');
 
 
 %%
@@ -278,4 +273,22 @@ function neigb = checkNeigb(puzzleMap,i,j)
         neigb = neigb + 1;
     end
     
+end
+
+function frameOut = getFlipHorFrame(frame)
+    frameOut = zeros(10,10);
+    for i=1:10
+        frameOut(i,:) = frame(11-i,:);
+    end
+end
+
+function frameOut = getFlipVertFrame(frame)
+    frameOut = zeros(10,10);
+    for i=1:10
+        frameOut(:,i) = frame(:,11-i);
+    end
+end
+
+function frameOut = getRotateFrame(frame, times)
+    frameOut = rot90(frame, times);
 end
