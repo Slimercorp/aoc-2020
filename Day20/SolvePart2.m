@@ -6,7 +6,6 @@ for i=1:length(data)
     data{i}.frame = frame(2:9,2:9);
 end
 
-
 %% build image
 fullMap=zeros(96,96);
 for i=1:12
@@ -44,7 +43,26 @@ for flipVert = 0:1
         end
     end
 end
-                
+
+%% output to file
+fid = fopen('output.txt','w');
+for i=1:96
+    for j=1:96
+        if fullMapWithMonsters(i,j) == 5
+            fwrite(fid,'.');
+        end
+        
+        if fullMapWithMonsters(i,j) == 9
+            fwrite(fid,'#');
+        end
+        
+        if fullMapWithMonsters(i,j) == 7
+            fwrite(fid,'O');
+        end
+    end
+    fwrite(fid,newline );
+end
+
 %%
 counter = 0;
 for i=1:96
@@ -96,92 +114,101 @@ function [countedMonsters,mapChanged] = countAndMarkMonstersOnFrame(map)
 
     height = 3;
     countedMonsters = 0;
+    lenMonster = 20;
 
     for i=height:96
-        j = 1;
-
-        part1 = false;
-        part2 = false;
-        part3 = false;
-        part4 = false;
-        while 1
-            
-            if j>96 || j+1 > 96
-                break;
-            end
+        for j=1:(96-lenMonster)
+                % part1
+                if ~(map(i-1,j) == 9)
+                    continue;
+                end
                 
-            if ~part1 && map(i-1,j) == 9 && map(i,j+1) == 9
-                part1Start = j;
-                part1 = true;
-                j = j + 2;
-            end
-            
-            if j>96 || j+1 > 96 || j+2 > 96 || j+3 > 96
-                break;
-            end
-            
-            if part1 && ~part2 && map(i,j) == 9 && map(i-1,j+1) == 9 && map(i-1,j+2) == 9 && map(i,j+3) == 9
-                part2Start = j;
-                part2 = true;
-                j = j + 4;
-            end
-            
-            if j>96 || j+1 > 96 || j+2 > 96 || j+3 > 96
-                break;
-            end
-            
-            if part1 && part2 && ~part3 && map(i,j) == 9 && map(i-1,j+1) == 9 && map(i-1,j+2) == 9 && map(i,j+3) == 9
-                part3 = true;
-                part3Start = j;
-                j = j + 4;
-            end
-            
-            if j>96 || j+1 > 96 || j+2 > 96 || j+3 > 96
-                break;
-             end
-            
-            if part1 && part2 && part3 && ~part4 && map(i,j) == 9 && map(i-1,j+1) == 9 && map(i-1,j+2) == 9 && map(i-2, j+2) == 9 && map(i-1,j+3) == 9
-                part4 = true;
-                part4Start = j;
-                j = j + 4;
-            end
-            
-            if part1 && part2 && part3 && part4
+                if ~(map(i,j+1) == 9)
+                    continue;
+                end
+                
+                % part2
+                if ~(map(i,j+4) == 9)
+                    continue;
+                end
+                
+                if ~(map(i-1,j+5) == 9)
+                    continue;
+                end
+                
+                if ~(map(i-1,j+6) == 9)
+                    continue;
+                end
+                
+                if ~(map(i,j+7) == 9)
+                    continue;
+                end
+                
+                % part3
+                if ~(map(i,j+10) == 9)
+                    continue;
+                end
+                
+                if ~(map(i-1,j+11) == 9)
+                    continue;
+                end
+                
+                if ~(map(i-1,j+12) == 9)
+                    continue;
+                end
+                
+                if ~(map(i,j+13) == 9)
+                    continue;
+                end
+                
+                %part4
+                if ~(map(i,j+16) == 9)
+                    continue;
+                end
+                
+                if ~(map(i-1,j+17) == 9)
+                    continue;
+                end
+                
+                if ~(map(i-1,j+18) == 9)
+                    continue;
+                end
+                
+                if ~(map(i-2,j+18) == 9)
+                    continue;
+                end
+                
+                if ~(map(i-1,j+19) == 9)
+                    continue;
+                end
+                
                 countedMonsters = countedMonsters + 1;
-                part1 = false;
-                part2 = false;
-                part3 = false;
-                part4 = false;
                 
                 %mark part1
-                map(i-1,part1Start) = 7;
-                map(i,part1Start+1) = 7;
+                map(i-1,j) = 7;
+                map(i,j+1) = 7;
                 
                 %mark part2
-                map(i,part2Start) = 7;
-                map(i-1,part2Start+1) = 7;
-                map(i-1,part2Start+2) = 7;
-                map(i,part2Start+3) = 7;
+                map(i,j+4) = 7;
+                map(i-1,j+5) = 7;
+                map(i-1,j+6) = 7;
+                map(i,j+7) = 7;
                 
                 %mark part3
-                map(i,part3Start) = 7;
-                map(i-1,part3Start+1) = 7;               
-                map(i-1,part3Start+2) = 7;
-                map(i,part3Start+3) = 7;
+                map(i,j+10) = 7;
+                map(i-1,j+11) = 7;               
+                map(i-1,j+12) = 7;
+                map(i,j+13) = 7;
                 
                 %mark part4
-                map(i,part4Start) = 7;
-                map(i-1,part4Start+1) = 7;
-                map(i-1,part4Start+2) = 7;
-                map(i-2,part4Start+2) = 7;
-                map(i-1,part4Start+3) = 7;
-            else
-                j = j + 1;
-            end
-            
+                map(i,j+16) = 7;
+                map(i-1,j+17) = 7;
+                map(i-1,j+18) = 7;
+                map(i-2,j+18) = 7;
+                map(i-1,j+19) = 7;
+                
         end
     end
-
 mapChanged = map;
 
 end
